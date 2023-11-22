@@ -6,20 +6,17 @@ const regd_users = express.Router();
 let users = [];
 
 const isValid = (username) => {
-  // returns boolean
-  // Check is the username is valid
   const validUsers = users.filter(user => user.username === username);
 
   return validUsers.length > 0;
 }
 
 const authenticatedUser = (username, password) => {
-  // returns boolean
-  // Check if username and password match the one we have in records.
   const validUsers = users.filter(user => user.username === username && user.password === password);
 
   return validUsers.length > 0;
 }
+
 
 // only registered users can login
 regd_users.post("/login", (req, res) => {
@@ -44,8 +41,19 @@ regd_users.post("/login", (req, res) => {
 
 // Add a book review
 regd_users.put("/auth/review/:isbn", (req, res) => {
-  //Write your code here
-  return res.status(300).json({ message: "Yet to be implemented" });
+  const { isbn } = req.params;
+  const { username } = req.session.authorization;
+  if (!username) return res.status(403).json({ message: "Must log in to add a review." });
+
+  const { review } = req.query;
+
+  if (books[isbn].reviews.username) {
+    books[isbn].reviews.username = review;
+  } else {
+    books[isbn].reviews[username] = review;
+  }
+
+  return res.status(200).json({ message: "Review added!" });
 });
 
 module.exports.authenticated = regd_users;
